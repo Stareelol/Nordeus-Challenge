@@ -16,10 +16,13 @@ public class GameScript : MonoBehaviour
     public GameObject[,] gameTiles = new GameObject[30, 30];
     public Color newColor;
 
-    void Start()
-    {
-        StartCoroutine(GetRequest("https://jobfair.nordeus.com/jf24-fullstack-challenge/test"));
-    }
+    static int[] dRow = { 0, 1, 0, -1 };
+    static int[] dCol = { -1, 0, 1, 0 };
+
+    public static int dfsSum = 0;
+    public static int dfsCount = 0;
+
+    public float largestIslandSum;
 
     IEnumerator GetRequest(string uri)
     {
@@ -40,11 +43,113 @@ public class GameScript : MonoBehaviour
                 case UnityWebRequest.Result.Success:
                     result = webRequest.downloadHandler.text;
                     InititateTiles(result);
+                    FindLargestIsland(result);
                     break;
             }
         }
     }
 
+    void Start()
+    {
+        StartCoroutine(GetRequest("https://jobfair.nordeus.com/jf24-fullstack-challenge/test"));
+    }
+
+    static bool isValid(bool[,] vis, int row, int col, GameObject[,] grid)
+    {
+
+        // If cell is out of bounds
+        if (row < 0 || col < 0 ||
+            row >= 30 || col >= 30)
+            return false;
+
+        // If the cell is already visited
+        if (vis[row, col] || grid[row, col].GetComponent<CalculateOnClickScript>().tileValue == 0)
+            return false;
+
+        // Otherwise, it can be visited
+        return true;
+    }
+
+    static void DFS(int row, int col, int[,] grid, bool[,] vis, GameObject[,] gameGrid)
+    {
+
+        // Initialize a stack of pairs and
+        // push the starting cell into it
+        Stack st = new Stack();
+        st.Push(new Tuple<int, int>(row, col));
+
+        // Iterate until the
+        // stack is not empty
+        while (st.Count > 0)
+        {
+
+            // Pop the top pair
+            Tuple<int, int> curr = (Tuple<int, int>)st.Peek();
+            st.Pop();
+
+            row = curr.Item1;
+            col = curr.Item2;
+
+            // Check if the current popped
+            // cell is a valid cell or not
+
+            if (!isValid(vis, row, col, gameGrid))
+                continue;
+
+            // Mark the current
+            // cell as visited
+            vis[row, col] = true;
+
+            // Print the element at
+            // the current top cell
+            //Debug.Log(grid[row, col] + " ");
+
+            dfsSum += grid[row, col];
+            dfsCount++;
+
+            //Debug.Log(dfsSum + " " + dfsCount);
+
+            // Push all the adjacent cells
+            for (int i = 0; i < 4; i++)
+            {
+                int adjx = row + dRow[i];
+                int adjy = col + dCol[i];
+                st.Push(new Tuple<int, int>(adjx, adjy));
+            }
+        }      
+    }
+
+    void FindLargestIsland(string result)
+    {
+        bool[,] vis = new bool[30, 30];
+        largestIslandSum = 0;
+
+        tiles = CreateMatrix(result);
+
+        for (int i = 0; i < 30; i++)
+        {
+            for (int j = 0; j < 30; j++)
+            {
+                vis[i, j] = false;
+            }
+        }
+
+        for (int i = 0; i < 30; i++)
+        {
+            for (int j = 0; j < 30; j++)
+            {
+                dfsSum = 0;
+                dfsCount = 0;
+                DFS(i, j, tiles, vis, gameTiles);
+                if (dfsSum != 0)
+                {
+                    if ((float)dfsSum / dfsCount > largestIslandSum) largestIslandSum = (float) dfsSum / dfsCount;
+                }
+            }
+        }
+
+        Debug.Log("Largest island: " + largestIslandSum);
+    }
 
     int[,] CreateMatrix(string text)
     {
@@ -65,29 +170,7 @@ public class GameScript : MonoBehaviour
         return matrix;
     }
 
-    //void PrintGameMatrix(GameObject[,] matrix)
-    //{
-    //    for (int i = 0; i < matrix.GetLength(0); i++)
-    //    {
-    //        for (int j = 0; j < matrix.GetLength(1); j++)
-    //        {
-    //            Debug.Log(matrix[i, j] +", i:" + i + " ,j:" + j);
-    //        }
-    //    }
-    //}
-
-    public void PrintMatrix(int[,] matrix)
-    {
-        for (int i = 0; i < matrix.GetLength(0); i++)
-        {
-            for (int j = 0; j < matrix.GetLength(1); j++)
-            {
-                Debug.Log(matrix[i, j] + ", i:" + i + " ,j:" + j);
-            }
-        }
-    }
-
-    Color GetColor(GameObject tile, int value)
+    Color GetColor(int value)
     {
         Color lowElevationColor = new Color(0.54f, 0.80f, 0.47f);
         Color midLowElevationColor = new Color(1f, 0.98f, 0.75f);
@@ -96,11 +179,10 @@ public class GameScript : MonoBehaviour
         Color veryHighElevationColor = Color.white;
         float newValue;
 
-        if (value <= 250)
+        if (value >= 1 && value <= 250)
         {
             newValue = value / 250f;
             newColor = Color.Lerp(lowElevationColor, midLowElevationColor, newValue);
-            Debug.Log(newValue + " , " +  newColor);
         }
 
         if (value > 250 && value <=500)
@@ -149,8 +231,8 @@ public class GameScript : MonoBehaviour
                 newTile.GetComponent<CalculateOnClickScript>().tileValue = tiles[i, j];
                 newTile.GetComponent<CalculateOnClickScript>().tileLocationX = j;
                 newTile.GetComponent<CalculateOnClickScript>().tileLocationY = i;
-                if (tiles[i, j] == 0) tile.GetComponent<SpriteRenderer>().color = new Color(0 / 255f, 105 / 255f, 148 / 255f);
-                else if (tiles[i, j] >= 0) tile.GetComponent<SpriteRenderer>().color = GetColor(tile, tiles[i, j]);
+                if (newTile.GetComponent<CalculateOnClickScript>().tileValue == 0) newTile.GetComponent<SpriteRenderer>().color = new Color(0 / 255f, 105 / 255f, 148 / 255f);
+                else if (newTile.GetComponent<CalculateOnClickScript>().tileValue >= 1) newTile.GetComponent<SpriteRenderer>().color = GetColor(newTile.GetComponent<CalculateOnClickScript>().tileValue);
             }
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class CalculateOnClickScript : MonoBehaviour
@@ -12,6 +13,8 @@ public class CalculateOnClickScript : MonoBehaviour
     public int tileLocationY;
     public int[,] allTiles;
     public GameObject[,] tileValues;
+    public static int dfsSum = 0;
+    public static int dfsCount = 0;
 
     static int[] dRow = { 0, 1, 0, -1 };
     static int[] dCol = { -1, 0, 1, 0 };
@@ -54,6 +57,7 @@ public class CalculateOnClickScript : MonoBehaviour
 
             // Check if the current popped
             // cell is a valid cell or not
+
             if (!isValid(vis, row, col, gameGrid))
                 continue;
 
@@ -63,7 +67,10 @@ public class CalculateOnClickScript : MonoBehaviour
 
             // Print the element at
             // the current top cell
-            Debug.Log(grid[row, col] + " ");
+            //Debug.Log(grid[row, col] + " ");
+
+            dfsSum += grid[row, col];
+            dfsCount++;
 
             // Push all the adjacent cells
             for (int i = 0; i < 4; i++)
@@ -88,6 +95,9 @@ public class CalculateOnClickScript : MonoBehaviour
     {
         GameScript gs = controller.GetComponent<GameScript>();
         bool[,] vis = new bool[30, 30];
+        float islandSum = 0;
+        dfsSum = 0;
+        dfsCount = 0;
 
         for (int i = 0; i < 30; i++)
         {
@@ -96,7 +106,12 @@ public class CalculateOnClickScript : MonoBehaviour
                 vis[i, j] = false;
             }
         }
+        DFS(tileLocationY, tileLocationX, allTiles, vis, tileValues);
 
-        DFS(tileLocationX, tileLocationY, allTiles, vis, tileValues);
+        if (dfsCount != 0) islandSum = (float)dfsSum / dfsCount;
+
+        if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
+        else Debug.Log("Incorrect island! + " + islandSum);
+
     }
 }
