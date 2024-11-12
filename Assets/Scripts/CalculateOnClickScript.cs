@@ -11,6 +11,7 @@ public class CalculateOnClickScript : MonoBehaviour
 
     GameObject controller;
     GameObject outline;
+    GameObject canvas;
     public int tileValue;
     public int tileLocationX;
     public int tileLocationY;
@@ -20,8 +21,9 @@ public class CalculateOnClickScript : MonoBehaviour
     public static int dfsCount = 0;
     public static float hoverScale = 1.3f;
     private static Vector3 originalScale;
-    static int[] dRow = { 0, 1, 0, -1 };
-    static int[] dCol = { -1, 0, 1, 0 };
+    static int[] dRow = { 0, 1, 0, -1, -1, 1, 1, -1 };
+    static int[] dCol = { -1, 0, 1, 0, 1, -1, 1, -1 };
+    public int health;
 
     static bool isValid(bool[,] vis, int row, int col, GameObject[,] grid)
     {
@@ -60,7 +62,7 @@ public class CalculateOnClickScript : MonoBehaviour
             dfsSum += grid[row, col];
             dfsCount++;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
             {
                 int adjx = row + dRow[i];
                 int adjy = col + dCol[i];
@@ -76,11 +78,13 @@ public class CalculateOnClickScript : MonoBehaviour
         tileValues = controller.GetComponent<GameScript>().gameTiles;
         originalScale = transform.localScale;
         outline = controller.GetComponent<GameScript>().outline;
+        canvas = GameObject.FindGameObjectWithTag("Canvas");
     }
 
     private void OnMouseDown()
     {
         GameScript gs = controller.GetComponent<GameScript>();
+        GameObject parent = null;
         bool[,] vis = new bool[30, 30];
         float islandSum = 0;
         dfsSum = 0;
@@ -97,17 +101,32 @@ public class CalculateOnClickScript : MonoBehaviour
 
         if (dfsCount != 0) islandSum = (float)dfsSum / dfsCount;
 
-        Debug.Log(islandSum);
+        if (tileValue != 0) parent = transform.parent.gameObject;
 
-        if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
-        else 
+        if(parent != null && parent.tag != "AlreadySelected")
         {
-            GameObject parent = transform.parent.gameObject;
-            foreach (Transform child in parent.transform)
+            if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
+            else
             {
-                GameObject newOutline = Instantiate(outline, child.transform.position, Quaternion.identity);
-                newOutline.GetComponent<SpriteRenderer>().color = new Color(204f / 255f, 0 / 255f, 0 / 255f, 0.9f);
-                newOutline.tag = "Incorrect";
+                foreach (Transform child in parent.transform)
+                {
+                    GameObject newOutline = Instantiate(outline, new Vector3(child.transform.position.x, child.transform.position.y,-1), Quaternion.identity);
+                    newOutline.GetComponent<SpriteRenderer>().color = new Color(204f / 255f, 0 / 255f, 0 / 255f, 0.9f);
+                    newOutline.tag = "Incorrect";
+                    parent.tag = "AlreadySelected";
+                }
+
+                GameObject[] outlines = GameObject.FindGameObjectsWithTag("Outline");
+
+                foreach (GameObject go in outlines)
+                {
+                    Destroy(go);
+                }
+
+                Debug.Log("Incorrect island! + " + islandSum);
+
+                gs.health--;
+                canvas.GetComponent<CanvasController>().ChangeHealth(gs.health);
             }
         }
     }
@@ -117,10 +136,13 @@ public class CalculateOnClickScript : MonoBehaviour
         if (tileValue != 0)
         {
             GameObject parent = transform.parent.gameObject;
-            foreach (Transform child in parent.transform)
+            if (parent.tag != "AlreadySelected")
             {
-                GameObject newOutline = Instantiate(outline, child.transform.position, Quaternion.identity);
-                newOutline.GetComponent<SpriteRenderer>().color = new Color(50f / 255f, 48f / 255f, 56f / 255f, 0.45f);
+                foreach (Transform child in parent.transform)
+                {
+                    GameObject newOutline = Instantiate(outline, new Vector3(child.transform.position.x, child.transform.position.y, -1), Quaternion.identity);
+                    newOutline.GetComponent<SpriteRenderer>().color = new Color(50f / 255f, 48f / 255f, 56f / 255f, 0.45f);
+                }
             }
         }
     }

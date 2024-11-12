@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Outline
   - Incorrect
+  - AlreadySelected
+  - Canvas
   layers:
   - Default
   - TransparentFX

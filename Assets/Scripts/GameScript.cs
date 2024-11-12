@@ -17,13 +17,15 @@ public class GameScript : MonoBehaviour
     public GameObject[,] gameTiles = new GameObject[30, 30];
     public Color newColor;
 
-    static int[] dRow = { 0, 1, 0, -1 };
-    static int[] dCol = { -1, 0, 1, 0 };
+    static int[] dRow = { 0, 1, 0, -1, -1, 1, 1, -1};
+    static int[] dCol = { -1, 0, 1, 0, 1, -1, 1, -1};
 
     public static int dfsSum = 0;
     public static int dfsCount = 0;
 
     public float largestIslandSum;
+
+    public int health;
 
     IEnumerator GetRequest(string uri)
     {
@@ -53,6 +55,15 @@ public class GameScript : MonoBehaviour
     void Start()
     {
         StartCoroutine(GetRequest("https://jobfair.nordeus.com/jf24-fullstack-challenge/test"));
+        health = 3;
+    }
+
+    void Update()
+    {
+        if (health <= 0)
+        {
+            Time.timeScale = 0;
+        }
     }
 
     static bool isValid(bool[,] vis, int row, int col, GameObject[,] grid)
@@ -111,7 +122,7 @@ public class GameScript : MonoBehaviour
             //Debug.Log(dfsSum + " " + dfsCount);
 
             // Push all the adjacent cells
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
             {
                 int adjx = row + dRow[i];
                 int adjy = col + dCol[i];
@@ -210,6 +221,8 @@ public class GameScript : MonoBehaviour
 
     void InititateTiles(string result)
     {
+        GameObject water = null;
+
         float posx;
         float posy = 7.25f;
         float offsetX,offsetY;
@@ -232,7 +245,12 @@ public class GameScript : MonoBehaviour
                 newTile.GetComponent<CalculateOnClickScript>().tileValue = tiles[i, j];
                 newTile.GetComponent<CalculateOnClickScript>().tileLocationX = j;
                 newTile.GetComponent<CalculateOnClickScript>().tileLocationY = i;
-                if (newTile.GetComponent<CalculateOnClickScript>().tileValue == 0) newTile.GetComponent<SpriteRenderer>().color = new Color(0 / 255f, 105 / 255f, 148 / 255f);
+                if (water == null) water = new GameObject("Water");
+                if (newTile.GetComponent<CalculateOnClickScript>().tileValue == 0)
+                {
+                    newTile.GetComponent<SpriteRenderer>().color = new Color(0 / 255f, 157 / 255f, 196 / 255f);
+                    newTile.transform.parent = water.transform;
+                }
                 else if (newTile.GetComponent<CalculateOnClickScript>().tileValue >= 1) newTile.GetComponent<SpriteRenderer>().color = GetColor(newTile.GetComponent<CalculateOnClickScript>().tileValue);
             }
         }
