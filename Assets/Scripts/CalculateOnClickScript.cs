@@ -2,12 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public class CalculateOnClickScript : MonoBehaviour
 {
 
     GameObject controller;
+    GameObject outline;
     public int tileValue;
     public int tileLocationX;
     public int tileLocationY;
@@ -15,7 +18,8 @@ public class CalculateOnClickScript : MonoBehaviour
     public GameObject[,] tileValues;
     public static int dfsSum = 0;
     public static int dfsCount = 0;
-
+    public static float hoverScale = 1.3f;
+    private static Vector3 originalScale;
     static int[] dRow = { 0, 1, 0, -1 };
     static int[] dCol = { -1, 0, 1, 0 };
 
@@ -37,42 +41,25 @@ public class CalculateOnClickScript : MonoBehaviour
 
     static void DFS(int row, int col, int[,] grid, bool[,] vis, GameObject[,] gameGrid)
     {
-
-        // Initialize a stack of pairs and
-        // push the starting cell into it
         Stack st = new Stack();
         st.Push(new Tuple<int, int>(row, col));
 
-        // Iterate until the
-        // stack is not empty
         while (st.Count > 0)
         {
-
-            // Pop the top pair
             Tuple<int, int> curr = (Tuple<int, int>)st.Peek();
             st.Pop();
 
             row = curr.Item1;
             col = curr.Item2;
 
-            // Check if the current popped
-            // cell is a valid cell or not
-
             if (!isValid(vis, row, col, gameGrid))
                 continue;
 
-            // Mark the current
-            // cell as visited
             vis[row, col] = true;
-
-            // Print the element at
-            // the current top cell
-            //Debug.Log(grid[row, col] + " ");
 
             dfsSum += grid[row, col];
             dfsCount++;
 
-            // Push all the adjacent cells
             for (int i = 0; i < 4; i++)
             {
                 int adjx = row + dRow[i];
@@ -82,13 +69,13 @@ public class CalculateOnClickScript : MonoBehaviour
         }
     }
 
-
-
     void Start()
     {
         controller = GameObject.FindGameObjectWithTag("GameController");
         allTiles = controller.GetComponent<GameScript>().tiles;
         tileValues = controller.GetComponent<GameScript>().gameTiles;
+        originalScale = transform.localScale;
+        outline = controller.GetComponent<GameScript>().outline;
     }
 
     private void OnMouseDown()
@@ -110,8 +97,41 @@ public class CalculateOnClickScript : MonoBehaviour
 
         if (dfsCount != 0) islandSum = (float)dfsSum / dfsCount;
 
-        if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
-        else Debug.Log("Incorrect island! + " + islandSum);
+        Debug.Log(islandSum);
 
+        if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
+        else 
+        {
+            GameObject parent = transform.parent.gameObject;
+            foreach (Transform child in parent.transform)
+            {
+                GameObject newOutline = Instantiate(outline, child.transform.position, Quaternion.identity);
+                newOutline.GetComponent<SpriteRenderer>().color = new Color(204f / 255f, 0 / 255f, 0 / 255f, 0.9f);
+                newOutline.tag = "Incorrect";
+            }
+        }
+    }
+
+    void OnMouseEnter()
+    {
+        if (tileValue != 0)
+        {
+            GameObject parent = transform.parent.gameObject;
+            foreach (Transform child in parent.transform)
+            {
+                GameObject newOutline = Instantiate(outline, child.transform.position, Quaternion.identity);
+                newOutline.GetComponent<SpriteRenderer>().color = new Color(50f / 255f, 48f / 255f, 56f / 255f, 0.45f);
+            }
+        }
+    }
+
+    void OnMouseExit()
+    {
+        GameObject[] outlines = GameObject.FindGameObjectsWithTag("Outline");
+
+        foreach(GameObject go in outlines)
+        {
+            Destroy(go);
+        }
     }
 }

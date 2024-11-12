@@ -245,7 +245,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tile: {fileID: 7645905414443080037, guid: 4a82ff5edc5a0da4fa3fa498f8bf219f, type: 3}
+  outline: {fileID: 5191939983215947491, guid: 2d4b04cbfb913d84fbb54613501bdb29, type: 3}
   result: 
+  newColor: {r: 0, g: 0, b: 0, a: 0}
+  largestIslandSum: 0
 --- !u!4 &659699642
 Transform:
   m_ObjectHideFlags: 0

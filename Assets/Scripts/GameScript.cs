@@ -11,6 +11,7 @@ public class GameScript : MonoBehaviour
 {
 
     public GameObject tile;
+    public GameObject outline;
     public int[,] tiles;
     public string result;
     public GameObject[,] gameTiles = new GameObject[30, 30];
@@ -56,7 +57,6 @@ public class GameScript : MonoBehaviour
 
     static bool isValid(bool[,] vis, int row, int col, GameObject[,] grid)
     {
-
         // If cell is out of bounds
         if (row < 0 || col < 0 ||
             row >= 30 || col >= 30)
@@ -78,11 +78,12 @@ public class GameScript : MonoBehaviour
         Stack st = new Stack();
         st.Push(new Tuple<int, int>(row, col));
 
+        GameObject island = null;
+
         // Iterate until the
         // stack is not empty
         while (st.Count > 0)
         {
-
             // Pop the top pair
             Tuple<int, int> curr = (Tuple<int, int>)st.Peek();
             st.Pop();
@@ -100,12 +101,12 @@ public class GameScript : MonoBehaviour
             // cell as visited
             vis[row, col] = true;
 
-            // Print the element at
-            // the current top cell
-            //Debug.Log(grid[row, col] + " ");
-
             dfsSum += grid[row, col];
             dfsCount++;
+
+            if (island == null) island = new GameObject("Island");
+
+            gameGrid[row, col].transform.parent = island.transform;
 
             //Debug.Log(dfsSum + " " + dfsCount);
 
