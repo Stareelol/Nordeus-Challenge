@@ -184,11 +184,11 @@ public class GameScript : MonoBehaviour
 
     Color GetColor(int value)
     {
-        Color lowElevationColor = new Color(0.54f, 0.80f, 0.47f);
-        Color midLowElevationColor = new Color(1f, 0.98f, 0.75f);
-        Color midHighElevationColor = new Color(1f, 0.86f, 0.56f);
-        Color highElevationColor = new Color(0.63f, 0.52f, 0.37f);
-        Color veryHighElevationColor = Color.white;
+        Color lowElevationColor = new Color(0.54f, 0.80f, 0.47f); // green 
+        Color midLowElevationColor = new Color(1f, 0.98f, 0.75f); // light yellow  
+        Color midHighElevationColor = new Color(1f, 0.86f, 0.56f); // light orange 
+        Color highElevationColor = new Color(0.63f, 0.52f, 0.37f); // dark yellow 
+        Color veryHighElevationColor = Color.white; 
         float newValue;
 
         if (value >= 1 && value <= 250)
