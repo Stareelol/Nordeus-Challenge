@@ -5,7 +5,19 @@ using UnityEngine.SceneManagement;
 
 public class MMScript : MonoBehaviour
 {
-    public void OnStart()
+
+    public GameObject tutorial;
+
+    void Start()
+    {
+        tutorial.SetActive(false);
+    }
+    public void TutorialStart()
+    {
+        tutorial.SetActive(true);
+    }
+
+    public void GameStart() 
     {
         SceneManager.LoadScene("Game");
     }
