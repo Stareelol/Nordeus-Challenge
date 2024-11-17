@@ -105,12 +105,16 @@ public class CalculateOnClickScript : MonoBehaviour
 
         if(parent != null && parent.tag != "AlreadySelected")
         {
-            if (gs.GetComponent<GameScript>().largestIslandSum == islandSum) Debug.Log("Correct island! + " + islandSum);
+            if (gs.GetComponent<GameScript>().largestIslandSum == islandSum)
+            {
+                gs.GameOver("win");
+                //Debug.Log("Correct island! + " + islandSum);
+            }
             else
             {
                 foreach (Transform child in parent.transform)
                 {
-                    GameObject newOutline = Instantiate(outline, new Vector3(child.transform.position.x, child.transform.position.y,-1), Quaternion.identity);
+                    GameObject newOutline = Instantiate(outline, new Vector3(child.transform.position.x, child.transform.position.y, -1), Quaternion.identity);
                     newOutline.GetComponent<SpriteRenderer>().color = new Color(204f / 255f, 0 / 255f, 0 / 255f, 0.9f);
                     newOutline.tag = "Incorrect";
                     parent.tag = "AlreadySelected";
@@ -123,10 +127,14 @@ public class CalculateOnClickScript : MonoBehaviour
                     Destroy(go);
                 }
 
-                Debug.Log("Incorrect island! + " + islandSum);
+                //Debug.Log("Incorrect island! + " + islandSum);
 
                 gs.health--;
                 canvas.GetComponent<CanvasController>().ChangeHealth(gs.health);
+                if (gs.health <= 0)
+                {
+                    gs.GameOver("lose");
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Tilemaps;
 using UnityEngine.Windows;
 using Random = UnityEngine.Random;
 
@@ -58,11 +59,43 @@ public class GameScript : MonoBehaviour
         health = 3;
     }
 
-    void Update()
+    public void GameOver(string result)
     {
-        if (health <= 0)
+        GameObject[] allTiles,allIncorrect,allSelected,allOutlines;
+        GameObject canvas;
+        canvas = GameObject.FindGameObjectWithTag("Canvas");
+        allTiles = GameObject.FindGameObjectsWithTag("Tiles");
+        allIncorrect = GameObject.FindGameObjectsWithTag("Incorrect");
+        allSelected = GameObject.FindGameObjectsWithTag("AlreadySelected");
+        allOutlines = GameObject.FindGameObjectsWithTag("Outline");
+
+        foreach (GameObject outline in allOutlines)
         {
-            Time.timeScale = 0;
+            outline.SetActive(false);
+        }
+
+        foreach (GameObject selected in allSelected)
+        {
+            selected.SetActive(false);
+        }
+
+        foreach (GameObject incorrect in allIncorrect)
+        {
+            incorrect.SetActive(false);
+        }
+
+        foreach (GameObject tile in allTiles)
+        {
+            tile.SetActive(false);
+        }
+
+        if (result == "win")
+        {
+            canvas.GetComponent<CanvasController>().GameOver("win");
+        }
+        else
+        {
+            canvas.GetComponent<CanvasController>().GameOver("lose");
         }
     }
 
@@ -118,6 +151,7 @@ public class GameScript : MonoBehaviour
             if (island == null) island = new GameObject("Island");
 
             gameGrid[row, col].transform.parent = island.transform;
+            gameGrid[row, col].transform.parent.tag = "Tiles";
 
             //Debug.Log(dfsSum + " " + dfsCount);
 
@@ -160,7 +194,7 @@ public class GameScript : MonoBehaviour
             }
         }
 
-        Debug.Log("Largest island: " + largestIslandSum);
+        //Debug.Log("Largest island: " + largestIslandSum);
     }
 
     int[,] CreateMatrix(string text)
@@ -234,7 +268,7 @@ public class GameScript : MonoBehaviour
             if (i == 0) offsetY = 0;
             else offsetY = 0.5f;
             posy -= offsetY;
-            posx = -7.497f;
+            posx = -7.247f;
             for (int j = 0; j < 30; j++)
             {
                 if (j == 0) offsetX = 0;
@@ -250,6 +284,7 @@ public class GameScript : MonoBehaviour
                 {
                     newTile.GetComponent<SpriteRenderer>().color = new Color(0 / 255f, 157 / 255f, 196 / 255f);
                     newTile.transform.parent = water.transform;
+                    newTile.transform.parent.tag = "Tiles";
                 }
                 else if (newTile.GetComponent<CalculateOnClickScript>().tileValue >= 1) newTile.GetComponent<SpriteRenderer>().color = GetColor(newTile.GetComponent<CalculateOnClickScript>().tileValue);
             }

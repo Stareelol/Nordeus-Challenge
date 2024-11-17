@@ -7,7 +7,7 @@ public class MMScript : MonoBehaviour
 {
 
     public GameObject tutorial;
-
+    public GameObject woodenSign;
     void Start()
     {
         tutorial.SetActive(false);
@@ -15,6 +15,7 @@ public class MMScript : MonoBehaviour
     public void TutorialStart()
     {
         tutorial.SetActive(true);
+        woodenSign.SetActive(false);
     }
 
     public void GameStart() 
