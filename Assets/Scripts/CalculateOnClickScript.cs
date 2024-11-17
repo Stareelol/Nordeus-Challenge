@@ -20,30 +20,25 @@ public class CalculateOnClickScript : MonoBehaviour
     public static int dfsSum = 0;
     public static int dfsCount = 0;
     public static float hoverScale = 1.3f;
-    private static Vector3 originalScale;
     static int[] dRow = { 0, 1, 0, -1, -1, 1, 1, -1 };
     static int[] dCol = { -1, 0, 1, 0, 1, -1, 1, -1 };
     public int health;
 
-    static bool isValid(bool[,] vis, int row, int col, GameObject[,] grid)
+    static bool IsValid(bool[,] vis, int row, int col, GameObject[,] grid)
     {
-
-        // If cell is out of bounds
         if (row < 0 || col < 0 ||
             row >= 30 || col >= 30)
             return false;
 
-        // If the cell is already visited
         if (vis[row, col] || grid[row,col].GetComponent<CalculateOnClickScript>().tileValue == 0)
             return false;
 
-        // Otherwise, it can be visited
         return true;
     }
 
     static void DFS(int row, int col, int[,] grid, bool[,] vis, GameObject[,] gameGrid)
     {
-        Stack st = new Stack();
+        Stack st = new();
         st.Push(new Tuple<int, int>(row, col));
 
         while (st.Count > 0)
@@ -54,7 +49,7 @@ public class CalculateOnClickScript : MonoBehaviour
             row = curr.Item1;
             col = curr.Item2;
 
-            if (!isValid(vis, row, col, gameGrid))
+            if (!IsValid(vis, row, col, gameGrid))
                 continue;
 
             vis[row, col] = true;
@@ -76,7 +71,6 @@ public class CalculateOnClickScript : MonoBehaviour
         controller = GameObject.FindGameObjectWithTag("GameController");
         allTiles = controller.GetComponent<GameScript>().tiles;
         tileValues = controller.GetComponent<GameScript>().gameTiles;
-        originalScale = transform.localScale;
         outline = controller.GetComponent<GameScript>().outline;
         canvas = GameObject.FindGameObjectWithTag("Canvas");
     }
@@ -103,7 +97,7 @@ public class CalculateOnClickScript : MonoBehaviour
 
         if (tileValue != 0) parent = transform.parent.gameObject;
 
-        if(parent != null && parent.tag != "AlreadySelected")
+        if(parent != null && !parent.CompareTag("AlreadySelected"))
         {
             if (gs.GetComponent<GameScript>().largestIslandSum == islandSum)
             {
@@ -144,7 +138,7 @@ public class CalculateOnClickScript : MonoBehaviour
         if (tileValue != 0)
         {
             GameObject parent = transform.parent.gameObject;
-            if (parent.tag != "AlreadySelected")
+            if (!parent.CompareTag("AlreadySelected"))
             {
                 foreach (Transform child in parent.transform)
                 {
